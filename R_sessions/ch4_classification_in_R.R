@@ -50,6 +50,7 @@ predict(glm.fit,newdata=data.frame(Lag1=c(1.2,1.5),Lag2=c(1.1,-0.8)),type="respo
 # Linear Discriminant Analysis
 
 library(MASS)
+par(mar=c(5.1,4.1,4.1,2.1))
 lda.fit=lda(Direction~Lag1+Lag2,data=Smarket,subset=train)
 lda.fit
 plot(lda.fit)

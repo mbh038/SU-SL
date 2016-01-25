@@ -11,35 +11,46 @@ library(MASS)
 str(Default)
 lda.fit=lda(default~student+balance,data=Default)
 lda.fit
-plot(lda.fit)
+#plot(lda.fit)
 
-lda.pred=predict(lda.fit, Default)
+lda.pred=predict(lda.fit, data=Default,na.action="na.omit", CV=TRUE)
 lda.class=lda.pred$class
 table(lda.class,Default$default)
 sum(table(lda.pred$posterior[,1]<0.01,Default$default))
 
-TPR<- vector(mode="numeric", length=500)
-FPR<- vector(mode="numeric", length=500)
-FNR<- vector(mode="numeric", length=500)
-threshold<-vector(mode="numeric", length=500)
-for ( i in 1:1000){
-    threshold[i]=i/1000
-    tab=table(lda.pred$posterior[,1]>=threshold[i],Default$default)
+nthresh=500
+maxthresh=0.5
+TPR<- vector(mode="numeric", length=nthresh)
+FPR<- vector(mode="numeric", length=nthresh)
+FNR<- vector(mode="numeric", length=nthresh)
+TER<- vector(mode="numeric", length=nthresh)
+threshold<-vector(mode="numeric", length=nthresh)
+for ( i in 1:nthresh){
+    threshold[i]=maxthresh*i/nthresh
+    tab=table(lda.pred$posterior[,2]>=threshold[i],Default$default)
+    #print(threshold[i])
+    #print(tab)
     if(nrow(tab)==1){
         tab<-rbind(tab,c(0,0))
     }
     if(ncol(tab)==1){
         tab<-cbind(tab,c(0,0))
     }
-    TPR[i]=tab[1,2]/sum(tab[,2])
+    TPR[i]=tab[2,2]/sum(tab[,2])
     FNR[i]=1-TPR[i]
-    FPR[i]=tab[1,1]/sum(tab[,1])
-}
+    FPR[i]=tab[2,1]/sum(tab[,1])
+    TER[i]=(tab[1,2]+tab[2,1])/sum(tab)
+    }
 
-plot(FPR,TPR)
-plot(threshold,FNR)
-plot(threshold,FPR)
-plot(threshold,TPR)
+plot(FPR,TPR,type="l",col="blue",main="ROC curve")
+plot(threshold,FNR,type="l",col="blue",xlab="threshold",ylab="Error rate")
+lines(threshold,FPR,type="l",col="red")
+lines(threshold,TER,type="l",col="black")
+
+library(pROC)
+roc_curve<-roc(Default$default,lda.pred$posterior[,1],plot=TRUE,direction=">",auc=TRUE)
+#plot(roc_curve)
+auc(Default$default, lda.pred$posterior[,1])
 
 
 mean(lda.class==Default$default)
