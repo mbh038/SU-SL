@@ -14,10 +14,27 @@ lda.fit
 #plot(lda.fit)
 
 lda.pred=predict(lda.fit, data=Default,na.action="na.omit", CV=TRUE)
-lda.class=lda.pred$class
-table(lda.class,Default$default)
-sum(table(lda.pred$posterior[,1]<0.01,Default$default))
+lda.class=lda.pred$class # prediction of the class (no (does not default) or yes (does) )
+table(lda.class,Default$default) # confusion table
+table(lda.pred$posterior[,2]>0.5,Default$default) # same table
 
+# might be easier to understand if we turn lda.pred object (a list) into a data frame
+
+lda.pred<-data.frame(lda.pred)
+head(lda.pred,5) # class 
+
+table(lda.pred$posterior.Yes>0.5,Default$default) # same table
+# means that if probability of a Yes is > 0.5, then we classify it as a Yes, etc
+# if choose higher thereshold, are less likely to classify as Yes, so more likely
+# to make False Negative error rate (FNR, Type 2 error) - 
+# Simliarly, the False Positive error rate (FPR, Type 1 error) will decline as 
+# the threshold increases, since we are less likely to classify something as positive 
+# if the threshold is higher.
+
+# FNR - to to classify as negative something that is actually positive.
+# FPR - to to classify as positive something that is actually negative.
+
+#Find ROC and AUC manually
 nthresh=500
 maxthresh=0.5
 TPR<- vector(mode="numeric", length=nthresh)
@@ -27,7 +44,7 @@ TER<- vector(mode="numeric", length=nthresh)
 threshold<-vector(mode="numeric", length=nthresh)
 for ( i in 1:nthresh){
     threshold[i]=maxthresh*i/nthresh
-    tab=table(lda.pred$posterior[,2]>=threshold[i],Default$default)
+    tab=table(lda.pred$posterior.Yes>=threshold[i],Default$default)
     #print(threshold[i])
     #print(tab)
     if(nrow(tab)==1){
@@ -47,16 +64,16 @@ plot(threshold,FNR,type="l",col="blue",xlab="threshold",ylab="Error rate")
 lines(threshold,FPR,type="l",col="red")
 lines(threshold,TER,type="l",col="black")
 
+# now see how much easier this is to do using pROC package
 library(pROC)
-roc_curve<-roc(Default$default,lda.pred$posterior[,1],plot=TRUE,direction=">",auc=TRUE)
-#plot(roc_curve)
-auc(Default$default, lda.pred$posterior[,1])
-
+roc_curve<-roc(Default$default,lda.pred$posterior.Yes)
+#also calculate AUC
+auc(Default$default, lda.pred$posterior.Yes)
 
 mean(lda.class==Default$default)
 
-sum(lda.pred$posterior[,1]>=.5)
-sum(lda.pred$posterior[,1]<.5)
+sum(lda.pred$posterior.No>=.5)
+sum(lda.pred$posterior.No<.5)
 lda.pred$posterior[1:20,1]
 lda.class[1:20]
 sum(lda.pred$posterior[,1]>.9)
