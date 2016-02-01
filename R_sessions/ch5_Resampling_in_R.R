@@ -18,7 +18,7 @@ loocv(glm.fit)
 
 
 cv.error=rep(0,5)
-degree=1:5
+c
 for(d in degree){
   glm.fit=glm(mpg~poly(horsepower,d), data=Auto)
   cv.error[d]=loocv(glm.fit)
@@ -48,6 +48,8 @@ alpha(Portfolio$X,Portfolio$Y)
 
 ## What is the standard error of alpha?
 
+# First, use the standard bootstrap
+
 alpha.fn=function(data, index){
   with(data[index,],alpha(X,Y))
 }
@@ -60,3 +62,8 @@ alpha.fn (Portfolio,sample(1:100,100,replace=TRUE))
 boot.out=boot(Portfolio,alpha.fn,R=1000)
 boot.out
 plot(boot.out)
+
+# When we do the i.i.d. bootstrap, we are relying on the original sampling having been i.i.d.
+# That is the same assumption that screwed us up when we used lm.
+
+# 
