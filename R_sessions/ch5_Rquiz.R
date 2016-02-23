@@ -1,3 +1,5 @@
+## R exercise for ISLR Ch5 quiz
+
 library(ISLR)
 library(car)
 library(boot)
