@@ -13,7 +13,7 @@ We see that `Assault` has a much larger variance than the other variables. It wo
 pca.out=prcomp(USArrests, scale=TRUE)
 pca.out
 names(pca.out)
-biplot(pca.out, scale=0)
+biplot(pca.out, scale=0,cex=0.6)
 ```
 
 K-Means Clustering
