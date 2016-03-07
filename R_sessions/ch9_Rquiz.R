@@ -8,10 +8,12 @@ dfnames<-c("x1","x2","x3","x4","x5","x6","x7","x8","x9","x10","y")
 # svm with default settings
 error.rates<-replicate(numTrials,{
     
-    x0=matrix(rnorm(500),50,10)
-    x1=matrix(rnorm(500),50,10)
-    x1[,1:5]<-x1[,1:5]+1
-    x<-rbind(x0,x1)
+#     x0=matrix(rnorm(500),50,10)
+#     x1=matrix(rnorm(500),50,10)
+#     x1[,1:5]<-x1[,1:5]+1
+#     x<-rbind(x0,x1)
+    x<-matrix(rnorm(1000),100,10)
+    x[51:100,1:5]<-x[51:100,1:5]+1
     y=rep(c(0,1),c(50,50))
     train=data.frame(x,y=as.factor(y))
     names(train)<-dfnames
